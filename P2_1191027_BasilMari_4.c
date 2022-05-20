@@ -1,22 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 struct Node{
-    int Rank;
-    char ChannelName[30];
-    char Uploads[20];
-    char Subscribers[20];
-    char Views[20];
-    struct Node* Right;
-    struct Node* Left;
+    char name[64];
+    int credits;
+    char topics[256];
+    struct Node* right;
+    struct Node* left;
     int Height;
 };
 
 struct Node* MakeEmpty(struct Node* T){
     if(T != NULL){
-        MakeEmpty(T->Left);
-        MakeEmpty(T->Right);
+        MakeEmpty(T->left);
+        MakeEmpty(T->right);
         free(T);
     }
     return NULL;
@@ -35,30 +34,30 @@ int getMax(int a, int b) {
 struct Node* getMin(struct Node* T)  {
     if(T == NULL)
         return NULL;
-    else if(T->Left == NULL)
+    else if(T->left == NULL)
         return T;
     else
-        return getMin(T->Left);
+        return getMin(T->left);
 }
 
-int CompareName(char key[30], char key2[30]){
+int CompareName(char key[64], char key2[64]){
     return strcmp(key2,key);
 }
 
-struct Node* Find(char ChannelName[30],struct Node* T){
+struct Node* Find(char name[64],struct Node* T){
     if(T == NULL)
         return NULL;
-    else if(CompareName(ChannelName,T->ChannelName)==-1)
-        return Find(ChannelName,T->Left);
-    else if(CompareName(ChannelName,T->ChannelName)==1)
-        return Find(ChannelName,T->Right);
+    else if(CompareName(name,T->name)==-1)
+        return Find(name,T->left);
+    else if(CompareName(name,T->name)==1)
+        return Find(name,T->right);
     else
         return T;
 };
 
-int IsRepeated(struct Node* T,char ChannelName[30]){
-    struct Node* N = Find(ChannelName,T);
-    if(N != NULL && strcasecmp(N->ChannelName,ChannelName)==0)
+int IsRepeated(struct Node* T,char name[64]){
+    struct Node* N = Find(name,T);
+    if(N != NULL && strcasecmp(N->name,name)==0)
         return 1;
     else
         return 0;
@@ -95,120 +94,103 @@ void Reconvert(char* Subs){
     }
 }
 
-struct Node* Update(struct Node* T,char Uploads[20],char Subscribers[20],char Views[20]){
-    unsigned long uploads = convert(T->Uploads);
-    unsigned long subscribers = convert(T->Subscribers);
-    unsigned long views = convert(T->Views);
-    unsigned long New_Uploads = convert(Uploads);
-    unsigned long New_Subscribers = convert(Subscribers);
-    unsigned long New_Views = convert(Views);
-
-    New_Uploads = New_Uploads + uploads;
-    New_Subscribers = New_Subscribers + subscribers;
-    New_Views = New_Views + views;
-
-    sprintf(T->Uploads, "%lu", New_Uploads);
-    sprintf(T->Subscribers, "%lu", New_Subscribers);
-    sprintf(T->Views, "%lu\n", New_Views);
-
-    Reconvert(T->Uploads);
-    Reconvert(T->Subscribers);
-    Reconvert(T->Views);
+struct Node* Update(struct Node* T, char name[64], int credits, char topics[256]){
+    strncpy(T->name, name, 64);
+	T->credits = credits;
+    strncpy(T->topics, topics, 256);
     return T;
 }
 
-struct Node* newNode(int Rank,char ChannelName[30],char Uploads[20],char Subscribers[20],char Views[20]){
+struct Node* newNode(char name[64], int credits ,char topics[256]){
     struct Node* node = (struct Node*)malloc(sizeof(struct Node));
-    node->Rank = Rank;
-    strcpy(node->ChannelName,ChannelName);
-    strcpy(node->Uploads,Uploads);
-    strcpy(node->Subscribers,Subscribers);
-    strcpy(node->Views,Views);
-    node->Right = NULL;
-    node->Left = NULL;
+    strncpy(node->name,name, 64);
+	node->credits = credits;
+    strncpy(node->topics, topics, 256);
+    node->right = NULL;
+    node->left = NULL;
     node->Height = 1;
     return node;
 }
 
-struct Node* RotateRight(struct Node* T){
-    struct Node* l = T->Left;
-    struct Node* r = l->Right;
+struct Node* Rotateright(struct Node* T){
+    struct Node* l = T->left;
+    struct Node* r = l->right;
 
-    l->Right = T;
-    T->Left = r;
+    l->right = T;
+    T->left = r;
 
-    T->Height = getMax(getHeight(T->Left),getHeight(T->Right))+1;
-    l->Height = getMax(getHeight(l->Left),getHeight(l->Right))+1;
+    T->Height = getMax(getHeight(T->left),getHeight(T->right))+1;
+    l->Height = getMax(getHeight(l->left),getHeight(l->right))+1;
     return l;
 }
 
-struct Node* RotateLeft(struct Node* T){
-    struct Node* r = T->Right;
-    struct Node* l = r->Left;
+struct Node* Rotateleft(struct Node* T){
+    struct Node* r = T->right;
+    struct Node* l = r->left;
 
-    r->Left = T;
-    T->Right = l;
+    r->left = T;
+    T->right = l;
 
-    T->Height = getMax(getHeight(T->Left),getHeight(T->Right))+1;
-    r->Height = getMax(getHeight(r->Left),getHeight(r->Right))+1;
+    T->Height = getMax(getHeight(T->left),getHeight(T->right))+1;
+    r->Height = getMax(getHeight(r->left),getHeight(r->right))+1;
     return r;
 }
 
 int getBalance(struct Node* N){
     if (N == NULL)
         return 0;
-    return getHeight(N->Left) - getHeight(N->Right);
+    return getHeight(N->left) - getHeight(N->right);
 }
 
-struct Node* Insert(struct Node* T,int Rank,char ChannelName[30],char Uploads[20],char Subscribers[20],char Views[20]){
+struct Node* Insert(struct Node* T,char name[64], int credits, char topics[256]){
     if(T == NULL)
-        return newNode(Rank,ChannelName,Uploads,Subscribers,Views);
+        return newNode(name, credits, topics);
 
-    else if(IsRepeated(T,ChannelName)){
+    else if(IsRepeated(T,name)){
         printf("Channel Already Exists!Data Updated!\n");
-        struct Node* R = Find(ChannelName,T);
-        R = Update(R,Uploads,Subscribers,Views);
+        struct Node* R = Find(name,T);
+        R = Update(R, name, credits, topics);
         return R;
     }
 
-    if(CompareName(ChannelName,T->ChannelName) == -1)
-        T->Left = Insert(T->Left,Rank,ChannelName,Uploads,Subscribers,Views);
-    else if(CompareName(ChannelName,T->ChannelName) == 1)
-        T->Right = Insert(T->Right,Rank,ChannelName,Uploads,Subscribers,Views);
+    if(CompareName(name,T->name) == -1)
+        T->left = Insert(T->left, name, credits, topics);
+    else if(CompareName(name,T->name) == 1)
+        T->right = Insert(T->left, name, credits, topics);
     else
         return T;
 
-    T->Height = getMax(getHeight(T->Left),getHeight(T->Right))+1;
+    T->Height = getMax(getHeight(T->left),getHeight(T->right))+1;
     int Balance = getBalance(T);
     //LL
-    if(Balance > 1 && CompareName(ChannelName,T->Left->ChannelName)==-1)
-        return RotateRight(T);
+    if(Balance > 1 && CompareName(name,T->left->name)==-1)
+        return Rotateright(T);
     //RR
-    if(Balance < -1 && CompareName(ChannelName,T->Right->ChannelName))
-        return RotateLeft(T);
+    if(Balance < -1 && CompareName(name,T->right->name))
+        return Rotateleft(T);
     //LR
-    if(Balance > 1 && CompareName(ChannelName,T->Left->ChannelName)==1){
-        T->Left =  RotateLeft(T->Left);
-        return RotateRight(T);
+    if(Balance > 1 && CompareName(name,T->left->name)==1){
+        T->left =  Rotateleft(T->left);
+        return Rotateright(T);
     }
     //RL
-    if(Balance < -1 && CompareName(ChannelName,T->Right->ChannelName)==1){
-        T->Right = RotateRight(T->Right);
-        return RotateLeft(T);
+    if(Balance < -1 && CompareName(name,T->right->name)==1){
+        T->right = Rotateright(T->right);
+        return Rotateleft(T);
     }
     return T;
 }
 
-struct Node* DeleteNode(struct Node* T,char ChannelName[30]){
+struct Node* DeleteNode(struct Node* T,char name[64]){
     if(T == NULL)
         return T;
-    if(CompareName(ChannelName,T->ChannelName)==-1)
-        T->Left = DeleteNode(T->Left,ChannelName);
-    else if(CompareName(ChannelName,T->ChannelName)==1)
-        T->Right = DeleteNode(T->Right,ChannelName);
+    if(CompareName(name,T->name)==-1)
+        T->left = DeleteNode(T->left,name);
+    else if(CompareName(name,T->name)==1)
+        T->right = DeleteNode(T->right,name);
     else{
-        if(T->Left == NULL || T->Right == NULL){
-            struct Node* temp = T->Left ? T->Left : T->Right;
+        if(T->left == NULL || T->right == NULL){
+            struct Node* temp = T->left ? T->left : T->right;
 
             if(temp == NULL){
                 temp = T;
@@ -219,89 +201,84 @@ struct Node* DeleteNode(struct Node* T,char ChannelName[30]){
             free(temp);
         }
         else{
-            struct Node* temp = getMin(T->Right);
-            T->Rank = temp ->Rank;
-            strcpy(T->ChannelName,temp->ChannelName);
-            strcpy(T->Uploads,temp->Uploads);
-            strcpy(T->Subscribers,temp->Subscribers);
-            strcpy(T->Views,temp->Views);
+            struct Node* temp = getMin(T->right);
+            strcpy(T->name,temp->name);
+            T->credits = temp ->credits;
+            strcpy(T->topics,temp->topics);
             T->Height = temp->Height;
 
-            T->Right = DeleteNode(T->Right,temp->ChannelName);
+            T->right = DeleteNode(T->right,temp->name);
         }
     }
     if(T == NULL)
         return T;
 
-     T->Height = getMax(getHeight(T->Left),getHeight(T->Right))+1;
+     T->Height = getMax(getHeight(T->left),getHeight(T->right))+1;
 
      int Balance = getBalance(T);
 
     //LL
-    if (Balance > 1 && getBalance(T->Left) >= 0)
-        return RotateRight(T);
+    if (Balance > 1 && getBalance(T->left) >= 0)
+        return Rotateright(T);
 
     //LR
-    if (Balance > 1 && getBalance(T->Left) < 0){
-        T->Left = RotateLeft(T->Left);
-        return RotateRight(T);
+    if (Balance > 1 && getBalance(T->left) < 0){
+        T->left = Rotateleft(T->left);
+        return Rotateright(T);
     }
 
     //RR
-    if (Balance < -1 && getBalance(T->Right) <= 0)
-        return RotateLeft(T);
+    if (Balance < -1 && getBalance(T->right) <= 0)
+        return Rotateleft(T);
 
     //RL
-    if (Balance < -1 && getBalance(T->Right) > 0){
-        T->Right = RotateRight(T->Right);
-        return RotateLeft(T);
+    if (Balance < -1 && getBalance(T->right) > 0){
+        T->right = Rotateright(T->right);
+        return Rotateleft(T);
     }
     return T;
 }
 
 void PrintData(struct Node* node){
     if(node != NULL)
-        printf("%d  %d  %s  %s  %s  %s\n",node->Height,node->Rank,node->ChannelName,node->Uploads,node->Subscribers,node->Views);
+        printf("%d  %s  %d  %s\n", node->Height, node->name,node->credits, node->topics);
     else
         printf("Not Found!\n");
 }
 
 void PreOrder(struct Node* T){
     if(T != NULL){
-        printf("%d  %2d  %s  %s  %s  %s",T->Height,T->Rank,T->ChannelName,T->Uploads,T->Subscribers,T->Views);
-        PreOrder(T->Left);
-        PreOrder(T->Right);
+        printf("%d  %s  %d  %s\n", T->Height, T->name, T->credits, T->topics);
+        PreOrder(T->left);
+        PreOrder(T->right);
     }
 }
 
 struct Node* LoadData(struct Node * T){
     FILE *in;
-    int Rank;
-    char ChannelName[30];
-    char Uploads[20];
-    char Subscribers[20];
-    char Views[20];
+    char name[64];
+    int credits;
+    char topics[256];
     char line[1000];
-    in = fopen("Youtube+Channels.txt","r");
+    in = fopen("courses.txt","r");
     while(fgets(line,1000,in) != 0){
-        if(feof(in))
-        break;
-    else
-            Rank = atoi(strtok(line,"\t"));
-            strcpy(ChannelName,strtok(NULL,"\t"));
-            strcpy(Uploads,strtok(NULL,"\t"));
-            strcpy(Subscribers,strtok(NULL,"\t"));
-            strcpy(Views,strtok(NULL,"\t"));
-            T = Insert(T,Rank,ChannelName,Uploads,Subscribers,Views);
-        }
-        fclose(in);
-        return T;
+		if(feof(in))
+        	break;
+		else {
+            strncpy(name, strtok(line,":"), 64);
+            credits = atoi(strtok(NULL,"#"));
+            strcpy(topics,strtok(NULL,"#"));
+            T = Insert(T, name, credits, topics);
+		}
+    }
+	fclose(in);
+	return T;
 }
 
 void SaveData(FILE *out,struct Node* T){
     if(T != NULL){
-        fprintf(out,"%2d	%s	%s	%s	%s",T->Rank,T->ChannelName,T->Uploads,T->Subscribers,T->Views);
-        SaveData(out,T->Left);
-        SaveData(out,T->Right);
+        fprintf(out,"%s	%d	%s", T->name, T->credits,T->topics);
+        SaveData(out,T->left);
+        SaveData(out,T->right);
     }
 }
