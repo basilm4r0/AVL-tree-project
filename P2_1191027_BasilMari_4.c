@@ -6,6 +6,8 @@
 struct Node{
 	char name[64];
 	int credits;
+	char code[16];
+	char department[64];
 	char topics[256];
 	struct Node* right;
 	struct Node* left;
@@ -94,17 +96,21 @@ void Reconvert(char* Subs){
 	}
 }
 
-struct Node* Update(struct Node* T, char name[64], int credits, char topics[256]){
+struct Node* Update(struct Node* T, char name[64], int credits, char code[16], char department[64], char topics[256]){
 	strncpy(T->name, name, 64);
 	T->credits = credits;
+	strncpy(T->code, code, 16);
+	strncpy(T->department, department, 64);
 	strncpy(T->topics, topics, 256);
 	return T;
 }
 
-struct Node* newNode(char name[64], int credits ,char topics[256]){
+struct Node* NewNode(char name[64], int credits, char code[16], char department[64], char topics[256]){
 	struct Node* node = (struct Node*)malloc(sizeof(struct Node));
 	strncpy(node->name,name, 64);
 	node->credits = credits;
+	strncpy(node->code, code, 16);
+	strncpy(node->department, department, 64);
 	strncpy(node->topics, topics, 256);
 	node->right = NULL;
 	node->left = NULL;
@@ -142,21 +148,21 @@ int getBalance(struct Node* N){
 	return getHeight(N->left) - getHeight(N->right);
 }
 
-struct Node* Insert(struct Node* T,char name[64], int credits, char topics[256]){
+struct Node* Insert(struct Node* T,char name[64], int credits, char code[16], char department[64], char topics[256]){
 	if(T == NULL)
-		return newNode(name, credits, topics);
+		return NewNode(name, credits, code, department, topics);
 
 	else if(IsRepeated(T,name)){
 		printf("Channel Already Exists!Data Updated!\n");
 		struct Node* R = Find(name,T);
-		R = Update(R, name, credits, topics);
+		R = Update(R, name, credits, code, department, topics);
 		return R;
 	}
 
 	if(CompareName(name,T->name) == -1)
-		T->left = Insert(T->left, name, credits, topics);
+		T->left = Insert(T->left, name, credits, code, department, topics);
 	else if(CompareName(name,T->name) == 1)
-		T->right = Insert(T->left, name, credits, topics);
+		T->right = Insert(T->left, name, credits, code, department, topics);
 	else
 		return T;
 
@@ -204,6 +210,8 @@ struct Node* DeleteNode(struct Node* T,char name[64]){
 			struct Node* temp = getMin(T->right);
 			strcpy(T->name,temp->name);
 			T->credits = temp ->credits;
+			strcpy(T->code,temp->code);
+			strcpy(T->department,temp->department);
 			strcpy(T->topics,temp->topics);
 			T->Height = temp->Height;
 
@@ -241,23 +249,26 @@ struct Node* DeleteNode(struct Node* T,char name[64]){
 
 void PrintData(struct Node* node){
 	if(node != NULL)
-		printf("%d  %s  %d  %s\n", node->Height, node->name,node->credits, node->topics);
+		printf("%d  %s  %d  %s  %s  %s\n", node->Height, node->name, node->credits, node->code, node->department, node->topics);
 	else
 		printf("Not Found!\n");
 }
 
 void PreOrder(struct Node* T){
 	if(T != NULL){
-		printf("%d  %s  %d  %s\n", T->Height, T->name, T->credits, T->topics);
 		PreOrder(T->left);
+		printf("%d  %s  %d  %s  %s  %s\n", T->Height, T->name, T->credits, T->code, T->department, T->topics);
 		PreOrder(T->right);
 	}
 }
 
-struct Node* LoadData(struct Node * T){
+struct Node* LoadData(struct Node* T){
+	struct Node* temp = T;
 	FILE *in;
 	char name[64];
 	int credits;
+	char code[16];
+	char department[64];
 	char topics[256];
 	char line[1000];
 	in = fopen("courses.txt","r");
@@ -267,8 +278,10 @@ struct Node* LoadData(struct Node * T){
 		else {
 			strncpy(name, strtok(line,":"), 64);
 			credits = atoi(strtok(NULL,"#"));
-			strcpy(topics,strtok(NULL,"#"));
-			T = Insert(T, name, credits, topics);
+			strcpy(code, strtok(NULL,"#"));
+			strcpy(department, strtok(NULL,"/"));
+			strcpy(topics, strtok(NULL,"\n"));
+			temp = Insert(temp, name, credits, code, department, topics);
 		}
 	}
 	fclose(in);
@@ -281,4 +294,12 @@ void SaveData(FILE *out,struct Node* T){
 		SaveData(out,T->left);
 		SaveData(out,T->right);
 	}
+}
+
+int main() {
+	struct Node* T = NULL;
+	T = LoadData(T);
+	PreOrder(T);
+	MakeEmpty(T);
+	return 0;
 }
