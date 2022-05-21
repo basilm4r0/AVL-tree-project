@@ -278,9 +278,9 @@ struct Node* LoadData(struct Node* T){
 		else {
 			strncpy(name, strtok(line,":"), 64);
 			credits = atoi(strtok(NULL,"#"));
-			strcpy(code, strtok(NULL,"#"));
-			strcpy(department, strtok(NULL,"/"));
-			strcpy(topics, strtok(NULL,"\n"));
+			strncpy(code, strtok(NULL,"#"), 16);
+			strncpy(department, strtok(NULL,"/"), 64);
+			strncpy(topics, strtok(NULL,"\n"), 256);
 			temp = Insert(temp, name, credits, code, department, topics);
 		}
 	}
