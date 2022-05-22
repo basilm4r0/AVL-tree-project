@@ -43,15 +43,15 @@ struct Node* getMin(struct Node* T)  {
 }
 
 int CompareName(char key[64], char key2[64]){
-	return strcmp(key, key2);
+	return strcasecmp(key, key2);
 }
 
 struct Node* Find(char name[64],struct Node* T){
 	if(T == NULL)
 		return NULL;
-	else if(CompareName(T->name, name) < 0)
+	else if(CompareName(name, T->name) < 0)
 		return Find(name,T->left);
-	else if(CompareName(T->name, name) > 0)
+	else if(CompareName(name, T->name) > 0)
 		return Find(name,T->right);
 	else
 		return T;
@@ -59,7 +59,7 @@ struct Node* Find(char name[64],struct Node* T){
 
 int IsRepeated(struct Node* T,char name[64]){
 	struct Node* N = Find(name,T);
-	if(N != NULL && strcasecmp(N->name,name)==0)
+	if(N != NULL && strcasecmp(name,N->name)==0)
 		return 1;
 	else
 		return 0;
@@ -159,28 +159,28 @@ struct Node* Insert(struct Node* T,char name[64], int credits, char code[16], ch
 		return R;
 	}
 
-	if(CompareName(T->name, name) < 0)
+	if(CompareName(name, T->name) < 0)
 		T->left = Insert(T->left, name, credits, code, department, topics);
-	else if(CompareName(T->name, name) > 0)
-		T->right = Insert(T->left, name, credits, code, department, topics);
+	else if(CompareName(name, T->name) > 0)
+		T->right = Insert(T->right, name, credits, code, department, topics);
 	else
 		return T;
 
 	T->Height = getMax(getHeight(T->left),getHeight(T->right))+1;
 	int Balance = getBalance(T);
 	//LL
-	if(Balance > 1 && CompareName(T->left->name, name) < 0)
+	if(Balance > 1 && CompareName(name, T->left->name) < 0)
 		return Rotateright(T);
 	//RR
-	if(Balance < -1 && CompareName(T->right->name, name) > 0)
+	if(Balance < -1 && CompareName(name, T->right->name) > 0)
 		return Rotateleft(T);
 	//LR
-	if(Balance > 1 && CompareName(T->left->name, name) > 0) {
+	if(Balance > 1 && CompareName(name, T->left->name) > 0) {
 		T->left =  Rotateleft(T->left);
 		return Rotateright(T);
 	}
 	//RL
-	if(Balance < -1 && CompareName(T->right->name, name) > 0) {
+	if(Balance < -1 && CompareName(name, T->right->name) > 0) {
 		T->right = Rotateright(T->right);
 		return Rotateleft(T);
 	}
@@ -190,9 +190,9 @@ struct Node* Insert(struct Node* T,char name[64], int credits, char code[16], ch
 struct Node* DeleteNode(struct Node* T,char name[64]){
 	if(T == NULL)
 		return T;
-	if(CompareName(T->name, name) < 0)
+	if(CompareName(name, T->name) < 0)
 		T->left = DeleteNode(T->left,name);
-	else if(CompareName(T->name, name) > 0)
+	else if(CompareName(name, T->name) > 0)
 		T->right = DeleteNode(T->right,name);
 	else{
 		if(T->left == NULL || T->right == NULL){
@@ -254,16 +254,15 @@ void PrintData(struct Node* node){
 		printf("Not Found!\n");
 }
 
-void PreOrder(struct Node* T){
+void InOrder(struct Node* T){
 	if(T != NULL){
-		PreOrder(T->left);
+		InOrder(T->left);
 		printf("%d  %s  %d  %s  %s  %s\n", T->Height, T->name, T->credits, T->code, T->department, T->topics);
-		PreOrder(T->right);
+		InOrder(T->right);
 	}
 }
 
 struct Node* LoadData(struct Node* T){
-	struct Node* temp = T;
 	FILE *in;
 	char name[64];
 	int credits;
@@ -281,7 +280,7 @@ struct Node* LoadData(struct Node* T){
 			strncpy(code, strtok(NULL,"#"), 16);
 			strncpy(department, strtok(NULL,"/"), 64);
 			strncpy(topics, strtok(NULL,"\n"), 256);
-			temp = Insert(temp, name, credits, code, department, topics);
+			T = Insert(T, name, credits, code, department, topics);
 		}
 	}
 	fclose(in);
@@ -299,7 +298,7 @@ void SaveData(FILE *out,struct Node* T){
 int main() {
 	struct Node* T = NULL;
 	T = LoadData(T);
-	PreOrder(T);
+	InOrder(T);
 	MakeEmpty(T);
 	return 0;
 }
