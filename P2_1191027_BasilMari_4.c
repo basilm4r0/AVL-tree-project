@@ -65,37 +65,6 @@ int IsRepeated(struct Node* T,char name[64]){
 		return 0;
 }
 
-unsigned long convert(char str[20]){
-	char result[100] = "";
-	char* token;
-	token = strtok(str,",");
-	if(token == NULL)
-		return 0;
-	while(token != NULL) {
-		strcat(result, token);
-		token = strtok(NULL,",");
-	}
-	unsigned long n = atoi(result);
-
-	return n;
-}
-
-void Reconvert(char* Subs){
-	char *ptr, *optr;
-	int i, length, commas;
-	for ( ptr = Subs; *ptr; ptr++ );
-	length = ptr - Subs;
-	commas = ( length - 1 ) / 3;
-	optr = Subs + length + commas;
-
-	*optr-- = *ptr--;
-	for(i=1;ptr>=Subs;i++){
-		*optr-- = *ptr--;
-		if((i%3)==0)
-			*optr-- = ',';
-	}
-}
-
 struct Node* Update(struct Node* T, char name[64], int credits, char code[16], char department[64], char topics[256]){
 	strncpy(T->name, name, 64);
 	T->credits = credits;
