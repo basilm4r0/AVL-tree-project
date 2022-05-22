@@ -43,15 +43,15 @@ struct Node* getMin(struct Node* T)  {
 }
 
 int CompareName(char key[64], char key2[64]){
-	return strcmp(key2,key);
+	return strcmp(key, key2);
 }
 
 struct Node* Find(char name[64],struct Node* T){
 	if(T == NULL)
 		return NULL;
-	else if(CompareName(name,T->name)==-1)
+	else if(CompareName(T->name, name) < 0)
 		return Find(name,T->left);
-	else if(CompareName(name,T->name)==1)
+	else if(CompareName(T->name, name) > 0)
 		return Find(name,T->right);
 	else
 		return T;
@@ -153,15 +153,15 @@ struct Node* Insert(struct Node* T,char name[64], int credits, char code[16], ch
 		return NewNode(name, credits, code, department, topics);
 
 	else if(IsRepeated(T,name)){
-		printf("Channel Already Exists!Data Updated!\n");
+		printf("Course Already Exists. Data Updated.\n");
 		struct Node* R = Find(name,T);
 		R = Update(R, name, credits, code, department, topics);
 		return R;
 	}
 
-	if(CompareName(name,T->name) == -1)
+	if(CompareName(T->name, name) < 0)
 		T->left = Insert(T->left, name, credits, code, department, topics);
-	else if(CompareName(name,T->name) == 1)
+	else if(CompareName(T->name, name) > 0)
 		T->right = Insert(T->left, name, credits, code, department, topics);
 	else
 		return T;
@@ -169,18 +169,18 @@ struct Node* Insert(struct Node* T,char name[64], int credits, char code[16], ch
 	T->Height = getMax(getHeight(T->left),getHeight(T->right))+1;
 	int Balance = getBalance(T);
 	//LL
-	if(Balance > 1 && CompareName(name,T->left->name)==-1)
+	if(Balance > 1 && CompareName(T->left->name, name) < 0)
 		return Rotateright(T);
 	//RR
-	if(Balance < -1 && CompareName(name,T->right->name))
+	if(Balance < -1 && CompareName(T->right->name, name) > 0)
 		return Rotateleft(T);
 	//LR
-	if(Balance > 1 && CompareName(name,T->left->name)==1){
+	if(Balance > 1 && CompareName(T->left->name, name) > 0) {
 		T->left =  Rotateleft(T->left);
 		return Rotateright(T);
 	}
 	//RL
-	if(Balance < -1 && CompareName(name,T->right->name)==1){
+	if(Balance < -1 && CompareName(T->right->name, name) > 0) {
 		T->right = Rotateright(T->right);
 		return Rotateleft(T);
 	}
@@ -190,9 +190,9 @@ struct Node* Insert(struct Node* T,char name[64], int credits, char code[16], ch
 struct Node* DeleteNode(struct Node* T,char name[64]){
 	if(T == NULL)
 		return T;
-	if(CompareName(name,T->name)==-1)
+	if(CompareName(T->name, name) < 0)
 		T->left = DeleteNode(T->left,name);
-	else if(CompareName(name,T->name)==1)
+	else if(CompareName(T->name, name) > 0)
 		T->right = DeleteNode(T->right,name);
 	else{
 		if(T->left == NULL || T->right == NULL){
