@@ -264,6 +264,12 @@ void SaveData(FILE *out,struct Node* T){
 	}
 }
 
+int TrimNewline(char name[]) {
+	if ((strlen(name) > 0) && (name[strlen (name) - 1] == '\n'))
+		name[strlen (name) - 1] = '\0';
+	return 1;
+}
+
 int main() {
 	int option;
 	char name[64];
@@ -271,13 +277,15 @@ int main() {
 	char code[16];
 	char department[64];
 	char topics[256];
+	char input[256];
 	struct Node* T = NULL;
 	struct Node* temp = NULL;
 
 	printf("\nEnter a number to perform one of the following operations:\n1. Load course list from busses.txt into a tree.\n2. Add new course.\n3. Update the information of a course.\n4. Print courses and their information in lexicographic order.\n5. Print topics associated with a course.\n6. List all courses in a department in lexicographic order.\n7. Delete a course.\n8. Delete all courses that start with a specific letter.\n9. Delete all courses that belong to a department.\n10. Save all information in a file named offered_courses.txt.\n");
 	do {
 		printf("Option: ");		//Printing prompt and reading user input
-		scanf("\n%d", &option);
+		fgets(input, 63, stdin);
+		sscanf(input, "%d", &option);
 		switch (option) {
 
 			case (1):			//Option 1: Load bus information from busses.txt
@@ -286,32 +294,48 @@ int main() {
 
 			case (2):			//Option 2: Load passenger information from passengers.txt
 				printf("Enter the information of the course to be added.\nCourse name: ");
-				scanf("%63s", name);
+				fgets(input, 63, stdin);
+				TrimNewline(input);
+				strcpy(name, input);
 				printf("Credit hours: ");
-				scanf("%d", &credits);
+				fgets(input, 63, stdin);
+				sscanf(input, "%d", &credits);
 				printf("Couse code: ");
-				scanf("%15s", code);
+				fgets(input, 15, stdin);
+				sscanf(input, "%15s", code);
 				printf("Department: ");
-				scanf("%63s", department);
+				fgets(input, 63, stdin);
+				sscanf(input, "%63s", department);
 				printf("Course topics: ");
-				scanf("%255s", topics);
+				fgets(input, 255, stdin);
+				TrimNewline(input);
+				strcpy(topics, input);
 				Insert(T, name, credits, code, department, topics);
 				break;
 
 			case (3):			//Option 3: Assign loaded passengers to loaded buses and print assignment information
-				printf("Enter the information of the course to be updated.\nCourse name: ");
-				scanf("%63s", name);
+				printf("Enter the information of the course to be updated. Course name: ");
+				fgets(input, 63, stdin);
+				TrimNewline(input);
+				strcpy(name, input);
 				printf("Credit hours: ");
-				scanf("%d", &credits);
+				fgets(input, 63, stdin);
+				sscanf(input, "%d", &credits);
 				printf("Couse code: ");
-				scanf("%15s", code);
+				fgets(input, 15, stdin);
+				sscanf(input, "%15s", code);
 				printf("Department: ");
-				scanf("%63s", department);
+				fgets(input, 63, stdin);
+				sscanf(input, "%63s", department);
 				printf("Course topics: ");
-				scanf("%255s", topics);
-				if (DeleteNode(T, name) == NULL)
-					printf("Course does not exist!\nAdding course to tree...\n");
-				Insert(T, name, credits, code, department, topics);
+				fgets(input, 255, stdin);
+				TrimNewline(input);
+				strcpy(topics, input);
+				if ((temp = Find(name, T)) == NULL)
+					printf("Course does not exist!\n");
+				else {
+					Update(temp, name, credits, code, department, topics);
+				}
 				break;
 
 			case (4):			//Option 4: Print information of specified bus along with its passengers
@@ -323,7 +347,9 @@ int main() {
 
 			case (5):			// Option 5: Print unmatched passengers and their information
 				printf("Course name: ");
-				scanf("%63s", name);
+				fgets(input, 63, stdin);
+				TrimNewline(input);
+				strcpy(name, input);
 				if ((temp = Find(name, T)) == NULL)
 					printf("Course does not exit!\n");
 				else
