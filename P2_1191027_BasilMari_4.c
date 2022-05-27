@@ -1,8 +1,11 @@
+// COMP2421 Project 2 by Basil Mari     Student ID: 1191027     Date: 27/5/2022      Section: 4
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 
+//define tree node data structure
 struct Node{
 	char name[64];
 	int credits;
@@ -14,6 +17,7 @@ struct Node{
 	int Height;
 };
 
+//Frees tree T from memory
 struct Node* MakeEmpty(struct Node* T){
 	if(T != NULL){
 		MakeEmpty(T->left);
@@ -23,16 +27,19 @@ struct Node* MakeEmpty(struct Node* T){
 	return NULL;
 }
 
+//returns height of node T
 int getHeight(struct Node* T) {
 	if(T == NULL)
 		return 0;
 	return T->Height;
 }
 
+//returns max of two ints
 int getMax(int a, int b) {
 	return (a > b)? a : b;
 }
 
+//returns deepest left node in tree branch
 struct Node* getMin(struct Node* T)  {
 	if(T == NULL)
 		return NULL;
@@ -42,10 +49,12 @@ struct Node* getMin(struct Node* T)  {
 		return getMin(T->left);
 }
 
+//implements strcasecmp on 64 byte strings
 int CompareName(char key[64], char key2[64]){
 	return strcasecmp(key, key2);
 }
 
+//Returns course with key name[] in tree T
 struct Node* Find(char name[64],struct Node* T){
 	if(T == NULL)
 		return NULL;
@@ -57,6 +66,7 @@ struct Node* Find(char name[64],struct Node* T){
 		return T;
 };
 
+//Returns parent of node with key name[] in tree T
 struct Node* FindParent(char name[64],struct Node* T){
 	if(T == NULL)
 		return NULL;
@@ -76,6 +86,7 @@ struct Node* FindParent(char name[64],struct Node* T){
 		return NULL;
 };
 
+//Checks if course with key name[] exists in tree T
 int IsRepeated(struct Node* T,char name[64]){
 	struct Node* N = Find(name,T);
 	if(N != NULL && strcasecmp(name,N->name)==0)
@@ -84,6 +95,7 @@ int IsRepeated(struct Node* T,char name[64]){
 		return 0;
 }
 
+//Updates course node data
 struct Node* Update(struct Node* T, char name[64], int credits, char code[16], char department[64], char topics[256]){
 	strncpy(T->name, name, 64);
 	T->credits = credits;
@@ -93,6 +105,7 @@ struct Node* Update(struct Node* T, char name[64], int credits, char code[16], c
 	return T;
 }
 
+//creates a new course node
 struct Node* NewNode(char name[64], int credits, char code[16], char department[64], char topics[256]){
 	struct Node* node = (struct Node*)malloc(sizeof(struct Node));
 	strncpy(node->name,name, 64);
@@ -106,6 +119,7 @@ struct Node* NewNode(char name[64], int credits, char code[16], char department[
 	return node;
 }
 
+//Rotates tree T to the right
 struct Node* Rotateright(struct Node* T){
 	struct Node* l = T->left;
 	struct Node* r = l->right;
@@ -118,6 +132,7 @@ struct Node* Rotateright(struct Node* T){
 	return l;
 }
 
+//Rotates tree T to the left
 struct Node* Rotateleft(struct Node* T){
 	struct Node* r = T->right;
 	struct Node* l = r->left;
@@ -130,12 +145,14 @@ struct Node* Rotateleft(struct Node* T){
 	return r;
 }
 
+//Returns banance factor for node N
 int getBalance(struct Node* N){
 	if (N == NULL)
 		return 0;
 	return getHeight(N->left) - getHeight(N->right);
 }
 
+//Inserts node in tree T and balances it
 struct Node* Insert(struct Node* T,char name[64], int credits, char code[16], char department[64], char topics[256]){
 	if(T == NULL)
 		return NewNode(name, credits, code, department, topics);
@@ -175,6 +192,7 @@ struct Node* Insert(struct Node* T,char name[64], int credits, char code[16], ch
 	return T;
 }
 
+//Deletes node with key name[] from tree with root node root
 struct Node* DeleteNode(struct Node* root, struct Node* T,char name[64]){
 	if(T == NULL)
 		return T;
@@ -246,6 +264,7 @@ struct Node* DeleteNode(struct Node* root, struct Node* T,char name[64]){
 	return T;
 }
 
+//Deletes courses with names that start with the specified letter from tree T
 void DeleteLetterCourses(char letter, struct Node* T, struct Node* root){
 	if(T != NULL){
 		DeleteLetterCourses(letter, T->left, root);
@@ -255,6 +274,7 @@ void DeleteLetterCourses(char letter, struct Node* T, struct Node* root){
 	}
 }
 
+//Deletes all courses that belong to a department from tree T
 void DeleteDepartmentCourses(char department[64], struct Node* T, struct Node* root){
 	if(T != NULL){
 		DeleteDepartmentCourses(department, T->left, root);
@@ -264,6 +284,7 @@ void DeleteDepartmentCourses(char department[64], struct Node* T, struct Node* r
 	}
 }
 
+//Prints course information of a single node
 void PrintData(struct Node* node){
 	if(node != NULL)
 		printf("%d  %s  %d  %s  %s  %s\n", node->Height, node->name, node->credits, node->code, node->department, node->topics);
@@ -271,6 +292,7 @@ void PrintData(struct Node* node){
 		printf("Not Found!\n");
 }
 
+//Prints course infromation for tree T In Order
 void InOrder(struct Node* T){
 	if(T != NULL){
 		InOrder(T->left);
@@ -279,6 +301,7 @@ void InOrder(struct Node* T){
 	}
 }
 
+//Prints course information for all courses in a department
 void DepartmentCourses(char department[64], struct Node* T){
 	if(T != NULL){
 		DepartmentCourses(department, T->left);
@@ -288,6 +311,7 @@ void DepartmentCourses(char department[64], struct Node* T){
 	}
 }
 
+//Loads information from courses.txt into tree T
 struct Node* LoadData(struct Node* T){
 	FILE *in;
 	char name[64];
@@ -297,7 +321,7 @@ struct Node* LoadData(struct Node* T){
 	char topics[256];
 	char line[500];
 	in = fopen("courses.txt","r");
-	while(fgets(line,499,in) != 0){
+	while(fgets(line,499,in) != 0){	//iterate file lines
 		if(feof(in))
 			break;
 		else {
@@ -313,6 +337,7 @@ struct Node* LoadData(struct Node* T){
 	return T;
 }
 
+//Prints passenger information from tree T to file out
 void SaveData(FILE* out,struct Node* T){
 	if(T != NULL){
 		SaveData(out,T->left);
@@ -321,15 +346,18 @@ void SaveData(FILE* out,struct Node* T){
 	}
 }
 
+//trims newline character at end of name[] string
 int TrimNewline(char name[]) {
 	if ((strlen(name) > 0) && (name[strlen (name) - 1] == '\n'))
 		name[strlen (name) - 1] = '\0';
 	return 1;
 }
 
+//Main body of program contains user interface
 int main() {
 	int option;
 	char name[64];
+	char newname[64];
 	int credits;
 	char code[16];
 	char department[64];
@@ -348,11 +376,11 @@ int main() {
 		sscanf(input, "%d", &option);
 		switch (option) {
 
-			case (1):			//Option 1: Load bus information from busses.txt
+			case (1):			//Option 1: Load courses from courses.txt into a tree
 				T = LoadData(T);
 				break;
 
-			case (2):			//Option 2: Load passenger information from passengers.txt
+			case (2):			//Option 2: Add a new course to tree
 				printf("Enter the information of the course to be added.\nCourse name: ");
 				fgets(input, 63, stdin);
 				TrimNewline(input);
@@ -373,11 +401,15 @@ int main() {
 				Insert(T, name, credits, code, department, topics);
 				break;
 
-			case (3):			//Option 3: Assign loaded passengers to loaded buses and print assignment information
+			case (3):			//Option 3: Update course information for a node
 				printf("Enter the information of the course to be updated. Course name: ");
 				fgets(input, 63, stdin);
 				TrimNewline(input);
 				strcpy(name, input);
+				printf("New course name: ");
+				fgets(input, 63, stdin);
+				TrimNewline(input);
+				strcpy(newname, input);
 				printf("Credit hours: ");
 				fgets(input, 63, stdin);
 				sscanf(input, "%d", &credits);
@@ -394,18 +426,23 @@ int main() {
 				if ((temp = Find(name, T)) == NULL)
 					printf("Course does not exist!\n");
 				else {
-					Update(temp, name, credits, code, department, topics);
+					if (CompareName(newname, name) == 0)
+						Update(temp, name, credits, code, department, topics);
+					else {
+						Insert(T, newname, credits, code, department, topics);
+						DeleteNode(T, temp, name);
+					}
 				}
 				break;
 
-			case (4):			//Option 4: Print information of specified bus along with its passengers
+			case (4):			//Option 4: Print all course information in lexicographic order
 				if (T != NULL) {
 					printf("\nCourses in tree:\n");
 					InOrder(T);
 				}
 				break;
 
-			case (5):			// Option 5: Print unmatched passengers and their information
+			case (5):			// Option 5: Print course information of a specific course
 				printf("Course name: ");
 				fgets(input, 63, stdin);
 				TrimNewline(input);
@@ -416,7 +453,7 @@ int main() {
 					printf("Course topics:\n%s\n", temp->topics);
 				break;
 
-			case (6):			// Option 6: Add passenger to passengerList
+			case (6):			// Option 6: Print course information of all courses within a department
 				printf("Department name: ");
 				fgets(input, 63, stdin);
 				TrimNewline(input);
@@ -427,7 +464,7 @@ int main() {
 				}
 				break;
 
-			case (7):			// Option 7: Delete passenger from passengerList
+			case (7):			// Option 7: Delete a course from the tree
 				printf("Course name: ");
 				fgets(input, 63, stdin);
 				TrimNewline(input);
@@ -439,7 +476,7 @@ int main() {
 
 				break;
 
-			case (8):			// Option 8: Delete bus from busList
+			case (8):			// Option 8: Delete all courses that start with a specific letter
 				printf("Letter: ");
 				fgets(input, 5, stdin);
 				TrimNewline(input);
@@ -449,7 +486,7 @@ int main() {
 				}
 				break;
 
-			case (9):			// Option 9: Exit program
+			case (9):			// Option 9: Delete all courses that belong to a specific department
 				printf("Department name: ");
 				fgets(input, 63, stdin);
 				TrimNewline(input);
@@ -459,11 +496,11 @@ int main() {
 				}
 				break;
 
-			case (10):			// Option 9: Exit program
+			case (10):			// Option 10: Save course information to output file offered_courses.txt
 				SaveData(out, T);
 				break;
 
-			case (11):			// Option 9: Exit program
+			case (11):			// Option 11: Exit program
 				printf("Exiting program...\n");
 				break;
 
@@ -471,7 +508,7 @@ int main() {
 				printf("Option invalid. Please enter a valid option.\n");
 				break;
 		}
-	} while(option != 11);
+	} while(option != 11); //check if exit option has been picked
 
 	MakeEmpty(T);
 	return 0;
