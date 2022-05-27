@@ -57,6 +57,25 @@ struct Node* Find(char name[64],struct Node* T){
 		return T;
 };
 
+struct Node* FindParent(char name[64],struct Node* T){
+	if(T == NULL)
+		return NULL;
+	else if(T->left != NULL) {
+		if(CompareName(name, T->left->name) == 0)
+			return T;
+	}
+	if(T->right != NULL) {
+		if(CompareName(name, T->right->name) == 0)
+			return T;
+	}
+	if(CompareName(name, T->name) < 0)
+		return FindParent(name,T->left);
+	if(CompareName(name, T->name) > 0)
+		return FindParent(name,T->right);
+	else
+		return NULL;
+};
+
 int IsRepeated(struct Node* T,char name[64]){
 	struct Node* N = Find(name,T);
 	if(N != NULL && strcasecmp(name,N->name)==0)
@@ -149,20 +168,20 @@ struct Node* Insert(struct Node* T,char name[64], int credits, char code[16], ch
 		return Rotateright(T);
 	}
 	//RL
-	if(Balance < -1 && CompareName(name, T->right->name) > 0) {
+	if(Balance < -1 && CompareName(name, T->right->name) < 0) {
 		T->right = Rotateright(T->right);
 		return Rotateleft(T);
 	}
 	return T;
 }
 
-struct Node* DeleteNode(struct Node* T,char name[64]){
+struct Node* DeleteNode(struct Node* root, struct Node* T,char name[64]){
 	if(T == NULL)
 		return T;
 	if(CompareName(name, T->name) < 0)
-		T->left = DeleteNode(T->left,name);
+		T->left = DeleteNode(root, T->left,name);
 	else if(CompareName(name, T->name) > 0)
-		T->right = DeleteNode(T->right,name);
+		T->right = DeleteNode(root, T->right,name);
 	else{
 		if(T->left == NULL || T->right == NULL){
 			struct Node* temp = T->left ? T->left : T->right;
@@ -170,6 +189,17 @@ struct Node* DeleteNode(struct Node* T,char name[64]){
 			if(temp == NULL){
 				temp = T;
 				T = NULL;
+				struct Node* parent = FindParent(temp->name, root);
+				if(parent != NULL) {
+					if(parent->left != NULL) {
+						if(CompareName(name, parent->left->name) == 0)
+							parent->left = NULL;
+					}
+					if(parent->right != NULL) {
+						if(CompareName(name, parent->right->name) == 0)
+							parent->right = NULL;
+					}
+				}
 			}
 			else
 				*T = *temp;
@@ -184,7 +214,7 @@ struct Node* DeleteNode(struct Node* T,char name[64]){
 			strcpy(T->topics,temp->topics);
 			T->Height = temp->Height;
 
-			T->right = DeleteNode(T->right,temp->name);
+			T->right = DeleteNode(root, T->right,temp->name);
 		}
 	}
 	if(T == NULL)
@@ -216,6 +246,24 @@ struct Node* DeleteNode(struct Node* T,char name[64]){
 	return T;
 }
 
+void DeleteLetterCourses(char letter, struct Node* T, struct Node* root){
+	if(T != NULL){
+		DeleteLetterCourses(letter, T->left, root);
+		DeleteLetterCourses(letter, T->right, root);
+		if (letter == T->name[0])
+			DeleteNode(root, root, T->name);
+	}
+}
+
+void DeleteDepartmentCourses(char department[64], struct Node* T, struct Node* root){
+	if(T != NULL){
+		DeleteDepartmentCourses(department, T->left, root);
+		DeleteDepartmentCourses(department, T->right, root);
+		if (strcmp(department, T->department) == 0)
+			DeleteNode(root, root, T->name);
+	}
+}
+
 void PrintData(struct Node* node){
 	if(node != NULL)
 		printf("%d  %s  %d  %s  %s  %s\n", node->Height, node->name, node->credits, node->code, node->department, node->topics);
@@ -228,6 +276,15 @@ void InOrder(struct Node* T){
 		InOrder(T->left);
 		printf("%d  %s  %d  %s  %s  %s\n", T->Height, T->name, T->credits, T->code, T->department, T->topics);
 		InOrder(T->right);
+	}
+}
+
+void DepartmentCourses(char department[64], struct Node* T){
+	if(T != NULL){
+		DepartmentCourses(department, T->left);
+		if (strcmp(department, T->department) == 0)
+			printf("%d  %s  %d  %s  %s  %s\n", T->Height, T->name, T->credits, T->code, T->department, T->topics);
+		DepartmentCourses(department, T->right);
 	}
 }
 
@@ -256,10 +313,10 @@ struct Node* LoadData(struct Node* T){
 	return T;
 }
 
-void SaveData(FILE *out,struct Node* T){
+void SaveData(FILE* out,struct Node* T){
 	if(T != NULL){
-		fprintf(out,"%s	%d	%s", T->name, T->credits,T->topics);
 		SaveData(out,T->left);
+		fprintf(out, "%s:%d#%s/%s\n", T->name, T->credits, T->code, T->topics);
 		SaveData(out,T->right);
 	}
 }
@@ -278,10 +335,13 @@ int main() {
 	char department[64];
 	char topics[256];
 	char input[256];
+	char letter;
 	struct Node* T = NULL;
 	struct Node* temp = NULL;
+	FILE* out;
+	out = fopen("offered_courses.txt","w");
 
-	printf("\nEnter a number to perform one of the following operations:\n1. Load course list from busses.txt into a tree.\n2. Add new course.\n3. Update the information of a course.\n4. Print courses and their information in lexicographic order.\n5. Print topics associated with a course.\n6. List all courses in a department in lexicographic order.\n7. Delete a course.\n8. Delete all courses that start with a specific letter.\n9. Delete all courses that belong to a department.\n10. Save all information in a file named offered_courses.txt.\n");
+	printf("\nEnter a number to perform one of the following operations:\n1. Load course list from busses.txt into a tree.\n2. Add new course.\n3. Update the information of a course.\n4. Print courses and their information in lexicographic order.\n5. Print topics associated with a course.\n6. List all courses in a department in lexicographic order.\n7. Delete a course.\n8. Delete all courses that start with a specific letter.\n9. Delete all courses that belong to a department.\n10. Save all information in a file named offered_courses.txt.\n11. Exit program.\n");
 	do {
 		printf("Option: ");		//Printing prompt and reading user input
 		fgets(input, 63, stdin);
@@ -357,15 +417,53 @@ int main() {
 				break;
 
 			case (6):			// Option 6: Add passenger to passengerList
+				printf("Department name: ");
+				fgets(input, 63, stdin);
+				TrimNewline(input);
+				strcpy(department, input);
+				if (T != NULL) {
+					printf("\nCourses in department:\n");
+					DepartmentCourses(department, T);
+				}
 				break;
 
 			case (7):			// Option 7: Delete passenger from passengerList
+				printf("Course name: ");
+				fgets(input, 63, stdin);
+				TrimNewline(input);
+				strcpy(name, input);
+				if ((temp = Find(name, T)) == NULL)
+					printf("Course does not exit!\n");
+				else
+					DeleteNode(T, T, name);
+
 				break;
 
 			case (8):			// Option 8: Delete bus from busList
+				printf("Letter: ");
+				fgets(input, 5, stdin);
+				TrimNewline(input);
+				sscanf(input, "%c", &letter);
+				if (T != NULL) {
+					DeleteLetterCourses(letter, T, T);
+				}
 				break;
 
 			case (9):			// Option 9: Exit program
+				printf("Department name: ");
+				fgets(input, 63, stdin);
+				TrimNewline(input);
+				strcpy(department, input);
+				if (T != NULL) {
+					DeleteDepartmentCourses(department, T, T);
+				}
+				break;
+
+			case (10):			// Option 9: Exit program
+				SaveData(out, T);
+				break;
+
+			case (11):			// Option 9: Exit program
 				printf("Exiting program...\n");
 				break;
 
@@ -373,7 +471,7 @@ int main() {
 				printf("Option invalid. Please enter a valid option.\n");
 				break;
 		}
-	} while(option != 9);
+	} while(option != 11);
 
 	MakeEmpty(T);
 	return 0;
