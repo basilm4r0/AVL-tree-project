@@ -508,7 +508,7 @@ int main() {
 				printf("Option invalid. Please enter a valid option.\n");
 				break;
 		}
-	} while(option != 11); //check if exit option has been picked
+	} while(option != 11); //check if exit option has been chosen
 
 	MakeEmpty(T);
 	return 0;
