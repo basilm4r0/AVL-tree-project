@@ -406,7 +406,7 @@ int main() {
 				fgets(input, 255, stdin);
 				TrimNewline(input);
 				strcpy(topics, input);
-				Insert(T, name, credits, code, department, topics);
+				T = Insert(T, name, credits, code, department, topics);
 				break;
 
 			case (3):			//Option 3: Update course information for a node
@@ -437,8 +437,8 @@ int main() {
 					if (CompareName(newname, name) == 0)
 						Update(temp, name, credits, code, department, topics);
 					else {
-						Insert(T, newname, credits, code, department, topics);
-						DeleteNode(T, T, name);
+						T = Insert(T, newname, credits, code, department, topics);
+						T = DeleteNode(T, T, name);
 					}
 				}
 				break;
@@ -480,7 +480,7 @@ int main() {
 				if ((temp = Find(name, T)) == NULL)
 					printf("Course does not exit!\n");
 				else
-					DeleteNode(T, T, name);
+					T = DeleteNode(T, T, name);
 
 				break;
 
