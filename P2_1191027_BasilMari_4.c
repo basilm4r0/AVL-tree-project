@@ -203,21 +203,22 @@ struct Node* DeleteNode(struct Node* root, struct Node* T,char name[64]){
 	else{
 		if(T->left == NULL || T->right == NULL){
 			struct Node* temp = T->left ? T->left : T->right;
-
+			struct Node* parent;
+			parent = FindParent(T->name, root);
+			if(parent != NULL) {
+				if(parent->left != NULL) {
+					if(CompareName(name, parent->left->name) == 0)
+						parent->left = NULL;
+				}
+				if(parent->right != NULL) {
+					if(CompareName(name, parent->right->name) == 0)
+						parent->right = NULL;
+				}
+			}
 			if(temp == NULL){
 				temp = T;
 				T = NULL;
-				struct Node* parent = FindParent(temp->name, root);
-				if(parent != NULL) {
-					if(parent->left != NULL) {
-						if(CompareName(name, parent->left->name) == 0)
-							parent->left = NULL;
-					}
-					if(parent->right != NULL) {
-						if(CompareName(name, parent->right->name) == 0)
-							parent->right = NULL;
-					}
-				}
+
 			}
 			else
 				*T = *temp;
@@ -265,13 +266,20 @@ struct Node* DeleteNode(struct Node* root, struct Node* T,char name[64]){
 }
 
 //Deletes courses with names that start with the specified letter from tree T
-void DeleteLetterCourses(char letter, struct Node* T, struct Node* root){
+struct Node* DeleteLetterCourses(char letter, struct Node* T, struct Node* root){
 	if(T != NULL){
 		DeleteLetterCourses(letter, T->left, root);
 		DeleteLetterCourses(letter, T->right, root);
-		if (letter == T->name[0])
-			DeleteNode(root, root, T->name);
+		if (letter == T->name[0]) {
+			char name[64];
+			strcpy(name, T->name);
+			return DeleteNode(root, root, name);
+		}
+		else
+			return T;
 	}
+	else
+		return NULL;
 }
 
 //Deletes all courses that belong to a department from tree T
@@ -430,7 +438,7 @@ int main() {
 						Update(temp, name, credits, code, department, topics);
 					else {
 						Insert(T, newname, credits, code, department, topics);
-						DeleteNode(T, temp, name);
+						DeleteNode(T, T, name);
 					}
 				}
 				break;
@@ -482,7 +490,7 @@ int main() {
 				TrimNewline(input);
 				sscanf(input, "%c", &letter);
 				if (T != NULL) {
-					DeleteLetterCourses(letter, T, T);
+					T = DeleteLetterCourses(letter, T, T);
 				}
 				break;
 
