@@ -268,28 +268,47 @@ struct Node* DeleteNode(struct Node* root, struct Node* T,char name[64]){
 //Deletes courses with names that start with the specified letter from tree T
 struct Node* DeleteLetterCourses(char letter, struct Node* T, struct Node* root){
 	if(T != NULL){
-		DeleteLetterCourses(letter, T->left, root);
-		DeleteLetterCourses(letter, T->right, root);
 		if (letter == T->name[0]) {
 			char name[64];
 			strcpy(name, T->name);
-			return DeleteNode(root, root, name);
+			root = DeleteNode(root, root, name);
+			T = root;
 		}
-		else
-			return T;
+		if (T != NULL) {
+			root = DeleteLetterCourses(letter, T->left, root);
+			T = root;
+		}
+		if (T != NULL) {
+			root = DeleteLetterCourses(letter, T->right, root);
+		}
+		return root;
 	}
 	else
-		return NULL;
+		return root;
 }
 
 //Deletes all courses that belong to a department from tree T
-void DeleteDepartmentCourses(char department[64], struct Node* T, struct Node* root){
+struct Node* DeleteDepartmentCourses(char department[64], struct Node* T, struct Node* root){
 	if(T != NULL){
-		DeleteDepartmentCourses(department, T->left, root);
-		DeleteDepartmentCourses(department, T->right, root);
-		if (strcmp(department, T->department) == 0)
-			DeleteNode(root, root, T->name);
+		if (strcmp(department, T->department) == 0) {
+			char name[64];
+			strcpy(name, T->name);
+			root = DeleteNode(root, root, name);
+			T = root;
+		}
+		if (T != NULL) {
+			root = DeleteDepartmentCourses(department, T->left, root);
+			T = root;
+		}
+		if (T != NULL) {
+			root = DeleteDepartmentCourses(department, T->right, root);
+			T = root;
+		}
+		return root;
 	}
+	else
+		return root;
+
 }
 
 //Prints course information of a single node
@@ -500,7 +519,7 @@ int main() {
 				TrimNewline(input);
 				strcpy(department, input);
 				if (T != NULL) {
-					DeleteDepartmentCourses(department, T, T);
+					T = DeleteDepartmentCourses(department, T, T);
 				}
 				break;
 
