@@ -368,7 +368,7 @@ struct Node* LoadData(struct Node* T){
 void SaveData(FILE* out,struct Node* T){
 	if(T != NULL){
 		SaveData(out,T->left);
-		fprintf(out, "%s:%d#%s/%s\n", T->name, T->credits, T->code, T->topics);
+		fprintf(out, "%s:%d#%s#%s/%s\n", T->name, T->credits, T->code, T->department, T->topics);
 		SaveData(out,T->right);
 	}
 }
