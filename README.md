@@ -2,6 +2,7 @@
 
 A university course database management system implemented using the AVL Tree data structure.
 
+
 The program supports the following functionality:
   1. Reading a file named courses.txt file and creating the tree.
   2. Inserting a new course from the user with all its associated data.
@@ -14,6 +15,7 @@ The program supports the following functionality:
   9. Deleting all courses belong to a given department.
   10. Saving all words in file offered_courses.txt
   
+
 The structure of one line of input in courses.txt is as follows:
 ```
 Course:CreditHours#CourseCode/topic1, topic2, ..., topicN
